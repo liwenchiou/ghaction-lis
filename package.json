@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node ./bin/index.js",
-    "deploy": "git push && ghaction-lis"
+    "deploy": "git push && node ./bin/index.js"
   },
   "keywords": [
     "github",
