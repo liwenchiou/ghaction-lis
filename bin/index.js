@@ -138,8 +138,7 @@ async function main() {
     } else {
       spinner.fail(chalk.red(`Action 執行失敗！🔥 (結論: ${currentRun.conclusion}, 總耗時: ${elapsedTotal}s)`));
       
-      // 智慧除錯：抓取失敗 Log 於終端機輸出
-      spinner.start(chalk.yellow('正在抓取失敗 Log 分析...'));
+      spinner.start(chalk.yellow('正在定位錯誤網址...'));
       try {
         const { data: jobsData } = await octokit.rest.actions.listJobsForWorkflowRun({
           owner,
@@ -151,34 +150,14 @@ async function main() {
         spinner.stop();
         
         if (failedJob) {
-          console.log('\n' + chalk.bgRed.white.bold(` [錯誤分析] Job: ${failedJob.name} 發生錯誤 `));
-          console.log(chalk.blue(`🔗 查看完整紀錄: ${failedJob.html_url}\n`));
-          
-          // 嘗試抓取 Job 的詳細日誌 (有時候 GitHub API 下載日誌會遇到 Redirect 或格式問題，這邊做簡單擷取)
-          try {
-            const { data: logData } = await octokit.rest.actions.downloadJobLogsForWorkflowRun({
-              owner,
-              repo,
-              job_id: failedJob.id,
-            });
-            
-            // 擷取最後 25 行顯示
-            const lines = String(logData).split('\n');
-            const lastLines = lines.slice(-25).join('\n');
-            console.log(chalk.gray('--- 錯誤日誌片段 (最後 25 行) ---'));
-            console.log(chalk.red(lastLines));
-            console.log(chalk.gray('----------------------------------'));
-          } catch (e) {
-            console.log(chalk.yellow('無法抓取詳細文字 Log (可能因日誌過長或已被 GitHub 清理)。'));
-          }
+          console.log(chalk.red(`❌ Job [${failedJob.name}] 發生錯誤`));
+          console.log(chalk.blue(`🔗 點擊查看紀錄: ${failedJob.html_url}\n`));
         } else {
-          console.log(chalk.yellow('無法定位具體失敗的 Job，請前往 GitHub 介面查看詳情。'));
-          console.log(chalk.blue(`🔗 ${currentRun.html_url}`));
+          console.log(chalk.blue(`🔗 點擊查看紀錄: ${currentRun.html_url}\n`));
         }
       } catch (logErr) {
         spinner.stop();
-        console.log(chalk.yellow('分析 Log 時發生錯誤，請直接前往網頁查看。'));
-        console.log(chalk.blue(`🔗 ${currentRun.html_url}`));
+        console.log(chalk.blue(`🔗 點擊查看紀錄: ${currentRun.html_url}\n`));
       }
       
       process.exit(1);
