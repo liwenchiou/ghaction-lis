@@ -125,6 +125,7 @@ async function main() {
     
     if (currentRun.conclusion === 'success') {
       spinner.succeed(chalk.green(`Action 執行成功！🎉 (總耗時: ${elapsedTotal}s)`));
+      console.log(chalk.blue(`🔗 點擊查看紀錄: ${currentRun.html_url}\n`));
       
       // 若有 --open 參數，自動開啟網頁
       if (options.open) {
