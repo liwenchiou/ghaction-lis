@@ -1,5 +1,8 @@
 # ghaction-lis (GitHub Action Listener)
 
+[![npm version](https://img.shields.io/npm/v/ghaction-lis.svg?color=blue)](https://www.npmjs.com/package/ghaction-lis)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > 一個輕量級的 CLI 工具，讓你直接在終端機監聽 GitHub Actions 的部署狀態。🚀
 
 再也不用頻繁切換視窗了！你不需要每次 `git push` 後都打開瀏覽器確認 CI/CD 是否通過。`ghaction-lis` 能直接在你的終端機內運行，即時回報進度，如果執行失敗，還能立刻找出並印出報錯的 Job 連結！
