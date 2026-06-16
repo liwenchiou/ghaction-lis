@@ -7,6 +7,9 @@
   "bin": {
     "ghaction-lis": "./bin/index.js"
   },
+  "files": [
+    "bin"
+  ],
   "scripts": {
     "start": "node ./bin/index.js",
     "deploy": "git push && node ./bin/index.js"

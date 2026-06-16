@@ -42,18 +42,26 @@ async function main() {
     const owner = match[1];
     const repo = match[2];
     
-    // 3. 認證整合：從 gh 取得 token
-    let token;
-    try {
-      token = runCmd('gh auth token');
-    } catch (e) {
-      spinner.fail(chalk.red('找不到有效的 GitHub Token！請確認您已安裝 GitHub CLI 並執行過 `gh auth login` 登入。'));
-      process.exit(1);
+    // 3. 認證整合：優先使用環境變數，其次嘗試 gh CLI
+    let token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      try {
+        token = runCmd('gh auth token');
+      } catch (e) {
+        token = null;
+      }
     }
 
-    const octokit = new Octokit({
-      auth: token,
-    });
+    const octokitOptions = {};
+    if (token) {
+      octokitOptions.auth = token;
+    } else {
+      spinner.warn(chalk.yellow('未偵測到 GitHub Token！將以「未登入」身分呼叫 API。'));
+      console.log(chalk.gray('👉 注意：這僅適用於「公開專案 (Public)」，且受限於 GitHub 每小時 60 次的呼叫限制，若輪詢太久可能會被阻擋。'));
+      spinner.start();
+    }
+
+    const octokit = new Octokit(octokitOptions);
 
     spinner.succeed(chalk.green(`成功鎖定專案：${owner}/${repo}`));
     spinner.start('正在抓取本地最新 Commit Hash...');
@@ -165,7 +173,16 @@ async function main() {
 
   } catch (err) {
     spinner.fail(chalk.red('發生未預期的系統錯誤！'));
-    console.error(err.message);
+    
+    // 針對 Private Repo 無權限的友善提示
+    if (err.status === 404 && !token) {
+      console.log(chalk.yellow('\n👉 提示：GitHub 拒絕了存取 (Not Found)。'));
+      console.log(chalk.yellow('這通常是因為這是一個「私有專案 (Private Repo)」，而您目前處於未登入狀態。'));
+      console.log(chalk.yellow('請設定環境變數 GITHUB_TOKEN，或執行 `gh auth login` 來取得存取權限！\n'));
+    } else {
+      console.error(err.message);
+    }
+    
     process.exit(1);
   }
 }
