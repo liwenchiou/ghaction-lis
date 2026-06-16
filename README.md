@@ -50,6 +50,9 @@ ghaction-lis
 
 ### 🟢 情境一：執行成功 (Success)
 ```text
+$ git add .
+$ git commit -m "chore: 測試一下流程"
+$ git push
 $ ghaction-lis
 ✔ 成功鎖定專案：liwenchiou/ghaction-lis
 ✔ 鎖定目標：Run ID #27612172810 (chore: 測試一下流程)
@@ -61,6 +64,9 @@ $ ghaction-lis
 
 ### 🔴 情境二：執行失敗 (Failure)
 ```text
+$ git add .
+$ git commit -m "test: 模擬打包出錯"
+$ git push
 $ ghaction-lis
 ✔ 成功鎖定專案：liwenchiou/ghaction-lis
 ✔ 鎖定目標：Run ID #27612307032 (test: 模擬打包出錯)
@@ -73,6 +79,9 @@ $ ghaction-lis
 
 ### 🟡 情境三：未提供 Token 且為私有專案 (Private Repo)
 ```text
+$ git add .
+$ git commit -m "fix: update private code"
+$ git push
 $ ghaction-lis
 ⚠ 未偵測到 GitHub Token！將以「未登入」身分呼叫 API。
 👉 注意：這僅適用於「公開專案 (Public)」，且受限於 GitHub 每小時 60 次的呼叫限制...
