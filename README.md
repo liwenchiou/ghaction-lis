@@ -14,13 +14,26 @@
 - **防止 Race Condition**：精準鎖定你剛推上去的 `head_sha`，絕對不會抓到舊的歷史紀錄。
 - **智慧錯誤定位**：如果 Action 失敗，會直接在終端機印出精確的報錯網址，點擊即可修復。
 
-## 📦 安裝方式
+## 📦 安裝與使用方式
 
-透過 npm 進行全域安裝：
+我們提供兩種使用方式，您可以根據自己的開發習慣來選擇：
+
+### 方案一：使用 `npx` (強烈推薦 ✨)
+
+我們推薦使用 `npx` 來執行，確保**零環境污染**且每次都能使用到**絕對最新版**：
+
+```bash
+npx ghaction-lis
+```
+
+### 方案二：全域安裝 (Global Install)
+
+如果您希望在任何地方都能直接敲打縮寫指令，可以透過 npm 進行全域安裝：
 
 ```bash
 npm install -g ghaction-lis
 ```
+安裝後，即可直接使用 `ghaction-lis` 指令。
 
 ### 🔐 認證需求
 
@@ -36,7 +49,12 @@ npm install -g ghaction-lis
 
 ```bash
 git push
+
+# 若已全域安裝：
 ghaction-lis
+
+# 若不想全域安裝：
+npx ghaction-lis
 ```
 
 ### 參數說明
@@ -95,14 +113,15 @@ $ ghaction-lis
 請設定環境變數 GITHUB_TOKEN，或執行 `gh auth login` 來取得存取權限！
 ```
 
-## 💡 最佳實踐：結合 npm scripts
+## 💡 最佳實踐：即插即用 (Plug & Play)
 
-最順暢的體驗是把 `ghaction-lis` 和你的發佈指令綁定在 `package.json` 中：
+最順暢的體驗是把工具和你的發佈指令綁定在 `package.json` 中。
+我們強烈推薦在這裡使用 `npx`，這樣未來其他開發者拉下專案後，**不需要額外安裝任何套件**就能直接享受到優雅的部署流程：
 
 ```json
 {
   "scripts": {
-    "deploy": "git push && ghaction-lis"
+    "deploy": "git push && npx ghaction-lis"
   }
 }
 ```
