@@ -22,7 +22,7 @@ jobs:
       # 💡 測試提示：
       # 如果你想要測試 ghaction-lis 的「報錯抓 Log」功能，
       # 可以把下面這兩行的註解拿掉，讓 Action 故意失敗：
-      # - name: Simulate Failure
-      #   run: |
-      #     echo "💥 發生致命錯誤，打包失敗！"
-      #     exit 1
+       - name: Simulate Failure
+         run: |
+           echo "💥 發生致命錯誤，打包失敗！"
+           exit 1
