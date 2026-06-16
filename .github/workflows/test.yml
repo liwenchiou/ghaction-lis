@@ -1,0 +1,28 @@
+name: Test Action
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  test-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Simulate Build Process
+        run: |
+          echo "🚀 開始模擬打包與建置流程..."
+          sleep 15
+          echo "✅ 模擬完成！"
+
+      # 💡 測試提示：
+      # 如果你想要測試 ghaction-lis 的「報錯抓 Log」功能，
+      # 可以把下面這兩行的註解拿掉，讓 Action 故意失敗：
+      # - name: Simulate Failure
+      #   run: |
+      #     echo "💥 發生致命錯誤，打包失敗！"
+      #     exit 1
