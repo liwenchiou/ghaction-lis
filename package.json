@@ -5,7 +5,7 @@
   "main": "bin/index.js",
   "type": "module",
   "bin": {
-    "ghaction-lis": "./bin/index.js"
+    "ghaction-lis": "bin/index.js"
   },
   "files": [
     "bin"
