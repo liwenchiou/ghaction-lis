@@ -11,6 +11,8 @@ program
   .name('ghaction-lis')
   .description('A lightweight CLI tool to listen to GitHub Actions deployment status.')
   .option('--open', '部署成功後，自動呼叫系統預設瀏覽器開啟指定的部署連結。')
+  .option('--chain <workflow-name>', '接續監聽特定的下游任務 (例如: AWS Deploy)')
+  .option('--pages', '自動接力監聽 GitHub Pages 部署任務 (等於 --chain "pages-build-deployment")')
   .option('--timeout <number>', '自訂監聽逾時分鐘數', 30)
   .parse(process.argv);
 
@@ -126,6 +128,66 @@ async function main() {
 
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       spinner.text = `GitHub Action 執行中 (${currentRun.status})，已耗時 ${elapsed}s...`;
+    }
+
+    // 第一階段成功，判斷是否需要接續監聽 Downstream (Chain) Action
+    if (currentRun.conclusion === 'success' && (options.chain || options.pages)) {
+      const chainName = options.pages ? 'pages-build-deployment' : options.chain;
+      spinner.succeed(chalk.green(`第一階段 Action 執行成功！(${currentRun.name})`));
+      spinner.start(`等待下游任務觸發 (${chainName})...`);
+      
+      let chainRun = null;
+      const waitChainStartTime = Date.now();
+      
+      // 尋找下游 Action (必須是第一階段完成後才建立或更新的)
+      while (!chainRun) {
+        if (Date.now() - waitChainStartTime > timeoutMs) {
+          spinner.fail(chalk.red(`等待下游任務 [${chainName}] 逾時，自動終止。`));
+          process.exit(1);
+        }
+
+        const { data: runsData } = await octokit.rest.actions.listWorkflowRunsForRepo({
+          owner,
+          repo,
+          per_page: 5,
+        });
+
+        // 找尋名字相符，且是在我們第一階段啟動之後才觸發的
+        const matchedChainRun = runsData.workflow_runs.find(
+          (run) => run.name === chainName && new Date(run.created_at) > new Date(waitActionStartTime)
+        );
+
+        if (matchedChainRun) {
+          chainRun = matchedChainRun;
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      }
+
+      spinner.succeed(chalk.green(`鎖定下游任務：Run ID #${chainRun.id} (${chainName})`));
+      spinner.start(`下游任務執行中...`);
+      
+      currentRun = chainRun;
+      
+      // 監聽第二階段的下游 Action
+      while (['in_progress', 'queued', 'waiting', 'requested', 'pending'].includes(currentRun.status)) {
+        if (Date.now() - startTime > timeoutMs) {
+          spinner.fail(chalk.red(`下游任務監聽逾時，自動終止。`));
+          process.exit(1);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        
+        const { data } = await octokit.rest.actions.getWorkflowRun({
+          owner,
+          repo,
+          run_id: chainRun.id,
+        });
+        currentRun = data;
+
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        spinner.text = `下游任務執行中 (${currentRun.status})，總耗時 ${elapsed}s...`;
+      }
     }
 
     // 6. 結果顯示與自毀

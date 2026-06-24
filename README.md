@@ -62,7 +62,27 @@ npx ghaction-lis
 | 參數 | 說明 |
 | :--- | :--- |
 | `--open` | 部署成功後，自動呼叫系統預設瀏覽器開啟 GitHub 紀錄網頁。 |
+| `--chain <name>` | **接力監聽 (Chained Workflow)**：在目前的 Action 成功完成後，接續監聽名為 `<name>` 的下游任務 (例如：`--chain "Deploy to AWS"`)。 |
+| `--pages` | **GitHub Pages 懶人包**：自動接力監聽 GitHub Pages 的發佈任務 (完全等同於 `--chain "pages-build-deployment"`)。 |
 | `--timeout <number>` | 自訂監聽逾時的分鐘數（預設為 30 分鐘）。 |
+
+## 🔗 兩階段/接力部署 (Chained Workflow) 支援
+
+有時候你的部署是分兩段的（例如：推送到 `main` 會先跑編譯，編譯成功後才觸發另一個叫做 `Deploy to AWS` 或 GitHub 官方的 `pages-build-deployment` 的後續任務）。因為 GitHub 將它們視為獨立的兩個事件，一般工具無法跨任務監聽。
+
+`ghaction-lis` 完美解決了這個痛點！你可以使用 `--chain` 或 `--pages` 來實現無縫的接力等待：
+
+**針對 GitHub Pages 使用者（懶人包）**：
+```bash
+npx ghaction-lis --pages --open
+```
+
+**針對自訂下游任務的使用者**：
+```bash
+# 假設你的第二階段任務名稱叫做 "Release to Production"
+npx ghaction-lis --chain "Release to Production"
+```
+程式會先監聽第一階段任務，等它成功後，自動鎖定並接續等待設定的第二階段任務完成！
 
 ## 💻 終端機情境範例
 
