@@ -12,7 +12,7 @@ program
   .description('A lightweight CLI tool to listen to GitHub Actions deployment status.')
   .option('--open', '部署成功後，自動呼叫系統預設瀏覽器開啟指定的部署連結。')
   .option('--chain <workflow-name>', '接續監聽特定的下游任務 (例如: AWS Deploy)')
-  .option('--pages', '自動接力監聽 GitHub Pages 部署任務 (等於 --chain "pages-build-deployment")')
+  .option('--pages', '自動接力監聽 GitHub Pages 部署任務 (等於 --chain "pages build and deployment")')
   .option('--timeout <number>', '自訂監聽逾時分鐘數', 30)
   .parse(process.argv);
 
@@ -24,6 +24,11 @@ const runCmd = (cmd) => execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe'
 
 async function main() {
   const spinner = ora('初始化並尋找專案資訊...').start();
+  
+  process.on('SIGINT', () => {
+    spinner.fail(chalk.yellow('\n使用者手動中斷監聽。'));
+    process.exit(0);
+  });
   
   try {
     // 2. 自動環境解析：取得 git origin url
@@ -132,7 +137,7 @@ async function main() {
 
     // 第一階段成功，判斷是否需要接續監聽 Downstream (Chain) Action
     if (currentRun.conclusion === 'success' && (options.chain || options.pages)) {
-      const chainName = options.pages ? 'pages-build-deployment' : options.chain;
+      const chainName = options.pages ? 'pages build and deployment' : options.chain;
       spinner.succeed(chalk.green(`第一階段 Action 執行成功！(${currentRun.name})`));
       spinner.start(`等待下游任務觸發 (${chainName})...`);
       
