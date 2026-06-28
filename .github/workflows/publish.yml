@@ -1,0 +1,25 @@
+name: Publish to NPM
+
+on:
+  push:
+    tags:
+      - 'v*' # 當推送 v 開頭的標籤時觸發 (例如 v1.1.2)
+  workflow_dispatch: # 也允許從 GitHub Actions 介面手動觸發
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # 必須要有這個權限才能跟 NPM 進行 OIDC 驗證
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - run: npm ci
+      
+      - run: npm publish --provenance
